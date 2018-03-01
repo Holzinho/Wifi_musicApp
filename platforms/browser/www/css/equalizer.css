@@ -1,0 +1,50 @@
+.equalizer {
+  text-align: center;
+  margin: 10px auto;
+  width: 100%;
+  background: black;
+  padding: 10px;
+}
+  
+  .column {
+    display: inline-block;
+    width: 40px;
+    margin: 5px;
+  }
+  
+  #purple {
+    height: 160px;
+    background-color: #8800FF;
+  }
+  
+  #blue {
+    height: 140px;
+    background-color: #0022FF;
+  }
+  
+  #cyan {
+    height: 100px;
+    background-color: #22FFFF;
+  }
+  
+  #green {
+    height: 140px;
+    background-color: #00BB00;
+  }
+  
+  #yellow {
+    height: 180px;
+    background-color: #FFFF00;
+  }
+  
+  #orange {
+    height: 70px;
+    background-color: #FF6600;
+  }
+  
+  #red {
+    height: 200px;
+    background-color: #FF0000;
+  }
+  
+  

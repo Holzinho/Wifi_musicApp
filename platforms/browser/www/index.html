@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/equalizer.css">
+    <title>Musik-Quiz</title>
+    <script src="css/jquery-3.3.1.min.js" ></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <script>
+
+        console.log($);
+    
+        $(document).ready(function() {
+            // are we running in native app or in a browser?
+            window.isphone = false;
+            if(document.URL.indexOf("http://") === -1 
+                && document.URL.indexOf("https://") === -1) {
+                window.isphone = true;
+            }
+        
+            if( window.isphone ) {
+                document.addEventListener("deviceready", onDeviceReady, false);
+            } else {
+                onDeviceReady();
+            }
+        });
+        
+        function onDeviceReady() {
+            // do everything here.
+            console.log('es funkt...')
+
+
+
+//A function to return a random number between a min and a max value
+function randomNumber(min, max) {
+  number =  Math.floor((Math.random()*(max-min))+ min);
+  return number;
+}
+
+//Initialise starting values
+var purple, blue, cyan, green, yellow, orange, red;
+purple = 160;
+blue = 140;
+cyan = 100;
+green = 140;
+yellow = 180;
+orange = 70;
+red = 200;
+
+//To start with the equalizer is paused
+var playing=false;
+
+// A Function to change the height of a column more or less randomly
+function changeHeight(column, height) {
+  height-=randomNumber(-20,20);
+  if (height>200) height=200;
+  if (height<5) height=5;
+  column.style.height=height + "px";  
+  return height;
+}
+
+
+//A Function that will be run every 50ms to animate the equalizer
+function animate() {
+  if (playing) {
+    purple = changeHeight(document.getElementById("purple"),purple);     
+    blue = changeHeight(document.getElementById("blue"),blue); 
+    cyan = changeHeight(document.getElementById("cyan"),cyan); 
+    green = changeHeight(document.getElementById("green"),green); 
+    yellow = changeHeight(document.getElementById("yellow"),yellow); 
+    orange = changeHeight(document.getElementById("orange"),orange); 
+    red = changeHeight(document.getElementById("red"),red); 
+    
+    //Repeat this function every 50 ms
+    setTimeout(animate, 50);
+  }
+}
+animate();
+
+//A Function to play or pause the animation
+function play() {
+  if (playing) {
+    playing=false;
+    document.getElementById("button").value="Play";    
+  } else {
+    playing=true;
+    document.getElementById("button").value="Pause";
+    animate();
+  }
+}
+
+        }
+    
+    </script>
+</head>
+    <body>
+
+            <div id="logo" class=""><img src="Logo-Musik-App-1.png" alt=""></div>
+            <!-- Login Seite --> 
+                <div id="login_page" class="">
+                    <form action="">
+                            <input class="row" type="text" name="username" id="username_login" placeholder="UserName">
+                            <input class="row" type="password" name="password" id="password_login" placeholder="Password">
+                            <button class="row" id="btn-login">Login</button>
+                            </form>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                <label class="form-check-label" for="exampleCheck1">Eingeloggt bleiben</label>
+                              </div>
+                        <div>oder <a href="#">Registrieren</a></div>
+                    </div>
+            <!-- Register Seite -->       
+            <div id="register_page" class="hide" >
+                <form action="">
+                    <input class="row" type="text" name="username" id="username_register" placeholder="UserName">
+                    <input class="row" type="password" name="password" id="password_register" placeholder="Password">
+                    <button class="row" id="btn-register">Register</button>
+                    </form>
+                <div>zurück zum <a href="#">Login</a></div>
+            </div>
+            <!-- Haupt Menü Seite --> 
+            <div id="main_manue" class="hide" >
+                <div class="navbar">
+                    <img src="Logo-Musik-App-Klein.png" alt="">
+                </div>
+                    <h3>Wählen sie aus folgenden Kategorien</h3>
+                        <button class="kat">Pop</button>
+                        <button class="kat">Hip Hop</button>
+                        <button class="kat">Schlager</button>
+                        <button class="kat">Klassik</button>
+                        <button class="btn btn-primary">weiter zum Quiz</button>
+            
+                </div>
+
+                <div id="quiz" class="hide" >
+                        <div class="navbar">
+                                <img src="Logo-Musik-App-Klein.png" alt="">
+                            </div>
+                        <audio src="Musik/HipHop/2Pac_DearMama.mp3"   ></audio>
+
+                        <div class="equalizer">
+                                <span class="column" id="purple"></span>
+                                <span class="column" id="blue"></span>
+                                <span class="column" id="cyan"></span>
+                                <span class="column" id="green"></span>
+                                <span class="column" id="yellow"></span>
+                                <span class="column" id="orange"></span>
+                                <span class="column" id="red"></span> 
+                                
+                             </div>
+
+                            <button class="antworten">Snoop Dogg, Let me ride</button>
+                            <button class="antworten">2Pac, Dear Mama</button>
+                            <button class="antworten">Xibit, X gonna give it to you</button>
+                            <button class="antworten">Ice-T, I'm your pusher</button>
+                            <button class="btn btn-primary">nächster Song <i class="fas fa-angle-right"></i></button>
+                
+                    </div>
+
+    </body>
+</html>
