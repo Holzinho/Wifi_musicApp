@@ -1,166 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/equalizer.css">
     <title>Musik-Quiz</title>
-    <script src="css/jquery-3.3.1.min.js" ></script>
+    <script src="js/jquery-3.3.1.min.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-    <script>
-
-        console.log($);
-    
-        $(document).ready(function() {
-            // are we running in native app or in a browser?
+    <!--<script src="js/equalizer.js"></script>
+    <script src="js/progress.js"></script>-->
+    <script src="js/register.js"></script>
+    <script src="js/login.js"></script>
+    <!--<script src="js/quiz.js"></script>-->
+    <script>  
+        $(document).ready(function () {
+            // Browser oder App
             window.isphone = false;
-            if(document.URL.indexOf("http://") === -1 
+            if (document.URL.indexOf("http://") === -1
                 && document.URL.indexOf("https://") === -1) {
                 window.isphone = true;
             }
-        
-            if( window.isphone ) {
+
+            if (window.isphone) {
                 document.addEventListener("deviceready", onDeviceReady, false);
             } else {
                 onDeviceReady();
             }
         });
-        
+
         function onDeviceReady() {
-            // do everything here.
-            console.log('es funkt...')
+
+            var loginConfig = {
+                onerror: function (err) {
+                    $('#regError').html(err.responseText);
+                },
+                onsuccess: function () {
+                    $('#regError').html('');
+                    $('#login_page').addClass('hide');
+                    $('#logo').addClass('hide');
+                    $('#main_manue').show();
+                }
+            },
+                onlogout = function () {
+                    $('#login_page').removeClass('hide');
+                    $('#logo').removeClass('hide');
+                    $('#main_manue').hide();
+                    $('#quiz').hide();
+                    $('#rangliste').addClass('hide');
+                    $('form')[0].reset();
+                }
+            if (localStorage.length > 0) {
+                login(localStorage.getItem('username'), localStorage.getItem('pw'), loginConfig);
+            }
+            // Hier ist der Code !!!
+            $('#btn-submit').on('click', function (e) {
+                e.preventDefault();
+                var username = $('#username').val(), pw = $('#password').val();
+                if ($('#btn-submit').html() == 'Registrieren') {
+                    register(username, pw, {
+                        onerror: function (response) {
+                            $('#regError').html(response.responseJSON ? response.responseJSON.message : 'Ein Server-Fehler ist aufgetreten!');
+                        },
+                        onsuccess: function (data) {
+                            login(username, pw, loginConfig);
+
+                        }
+                    });
+                }
+                if ($('#btn-submit').html() == 'Login') {
+                    login(username, pw, loginConfig);
+                }         // register($('#username_login'), $('#password_login'));
+            });
+            //funktion ---------------
+
+            var questions;
+            var counter = 0;
+            var loadQuestions = function (_questions) {
+                                questions = _questions;
+                            };
+           /* var getNextQuestion = function () {
+                                return questions[counter++];
+              };*/
+              var prepareBtns = function () {
+                                var currentAnswers = [];
+                                currentAnswers = Object.create(questions[counter].incorrectAnswers);
+
+                                currentAnswers.push(questions[counter].correctAnswer);
+
+                                for (var i = 0; i < 4; i++) {
+                                    var random = Math.floor(Math.random() * currentAnswers.length);
+                                    $($('.antworten')[i]).html(currentAnswers.splice(random, 1)[0]);
+                                }
+                                console.log(currentAnswers);
+                            }
+
+            
+            //funktion ende----------------------
+            /*also();
+            randomNumber();
+            animate();*/
+
+            $('#login_page > div > a').on('click', function () {
+                if ($('#btn-submit').html() === 'Registrieren') {
+                    $('#btn-submit').html('Login');
+                    $(this).html('Jetzt registrieren');
+                    return;
+                }
+                if ($('#btn-submit').html() == 'Login') {
+                    $('#btn-submit').html('Registrieren');
+                    $(this).html('zum Login');
+                    return;
+                }
+                console.log(this);
+            })
+            //Logout Button
+            $('.btn-logout').on('click', function () {
+                logout(onlogout);
+            })
+
+            $('#selectCat').on('change', function () {
+                $('#btn-startQuiz').prop('disabled', false);
+            });
+            $('#btn-startQuiz').on('click', function (e) {
+                var currentQuest = 0, score = 0, audio, cat = $('#selectCat > input:checked').val();
+                $.get({
+                    url: 'startQuiz/' + cat,
+                    complete: function (data) {
+                        $('#next').prop('disabled', true);
+                        $('#main_manue').hide();
+                        $('#antworten input').prop('checked', false);
+                        $('#quiz').show();
+                        
+                        loadQuestions(data.responseJSON);
+                        console.log(data.responseJSON);
+                        //-----------------------------------------------------------------------------------------------------
+                        prepareBtns();
+                        //-----------------------------------------------------------------------------------------------------------
+                        
+                        var x = JSON.parse(data.responseText);
+                        console.log(x[currentQuest].correctAnswer);
+                        $('<audio>')
+                            .appendTo('#musik')
+                            .attr('src', 'Musik/' + cat + '/' + x[currentQuest].correctAnswer)
+                            .prop('autoplay', true);
+                        //soll den Countdown starten...        
+
+
+                        var width = 10;
+                        var starteProgress = function () {
+
+                            if (width > 0) {
+                                width--;
+                                console.log(width);
+                                $('.progress-bar').css({ 'width': width * 10 + '%' }).html(width + ' Sek');
+
+                            } if (width == 0) {
+
+                                clearInterval(stopProgress);
+                                console.log('Fertig...');
+                            };
+
+                        };
+                        var stopProgress = setInterval(function () { starteProgress() }, 1000);
+
+
+                        $('.antworten').on('click', function () {
+
+                            console.log(this.textContent);
+                            $('#next').prop('disabled', false);
+                            if (this.textContent == x[currentQuest].correctAnswer) {
+                                console.log('right');
+                                clearInterval(stopProgress);
+                                score = score + 100;
+                                $('audio').remove();
+                                console.log(score);
+                                $(this)
+                                    .css({ 'background-color': 'green' });
+                            } else {
+                                clearInterval(stopProgress);
+                                $(this)
+                                    .css({ 'background-color': 'red' });
+                                $('audio').remove();
+                                console.log('falsche Antwort');
+                            }
+
+                        })
+                        $('#next').on('click', function () {
+                            if(counter < 9){
+                            currentQuest++;
+                            counter++;
+                            console.log(counter);
+                            $('#next').prop('disabled', true);
+                            console.log(currentQuest);
+                            $('#antworten input')
+                                .prop('checked', false);
+                            $('.antworten')
+                                .css({ 'background-color': 'lightblue', 'color': 'black' });
+                            
+                            //nicht fix ------------------------------------
+                            prepareBtns();
+                            //noch nicht fix-----------------------------------------
+
+
+                            var x = JSON.parse(data.responseText);
+                            console.log(x[currentQuest].correctAnswer);
+                            console.log(x);
+                            $('<audio>')
+                                .appendTo('#musik')
+                                .attr('src', 'Musik/' + cat + '/' + x[currentQuest].correctAnswer)
+                                .prop('autoplay', true);
+                            } else {
+                                $('#quiz').hide();
+                                $('#rangliste').show();
+                            }
 
 
 
-//A function to return a random number between a min and a max value
-function randomNumber(min, max) {
-  number =  Math.floor((Math.random()*(max-min))+ min);
-  return number;
-}
 
-//Initialise starting values
-var purple, blue, cyan, green, yellow, orange, red;
-purple = 160;
-blue = 140;
-cyan = 100;
-green = 140;
-yellow = 180;
-orange = 70;
-red = 200;
-
-//To start with the equalizer is paused
-var playing=false;
-
-// A Function to change the height of a column more or less randomly
-function changeHeight(column, height) {
-  height-=randomNumber(-20,20);
-  if (height>200) height=200;
-  if (height<5) height=5;
-  column.style.height=height + "px";  
-  return height;
-}
+                        })
+                    }
+                });
+            });
 
 
-//A Function that will be run every 50ms to animate the equalizer
-function animate() {
-  if (playing) {
-    purple = changeHeight(document.getElementById("purple"),purple);     
-    blue = changeHeight(document.getElementById("blue"),blue); 
-    cyan = changeHeight(document.getElementById("cyan"),cyan); 
-    green = changeHeight(document.getElementById("green"),green); 
-    yellow = changeHeight(document.getElementById("yellow"),yellow); 
-    orange = changeHeight(document.getElementById("orange"),orange); 
-    red = changeHeight(document.getElementById("red"),red); 
-    
-    //Repeat this function every 50 ms
-    setTimeout(animate, 50);
-  }
-}
-animate();
-
-//A Function to play or pause the animation
-function play() {
-  if (playing) {
-    playing=false;
-    document.getElementById("button").value="Play";    
-  } else {
-    playing=true;
-    document.getElementById("button").value="Pause";
-    animate();
-  }
-}
 
         }
-    
+
+
+
     </script>
 </head>
-    <body>
 
-            <div id="logo" class=""><img src="Logo-Musik-App-1.png" alt=""></div>
-            <!-- Login Seite --> 
-                <div id="login_page" class="">
-                    <form action="">
-                            <input class="row" type="text" name="username" id="username_login" placeholder="UserName">
-                            <input class="row" type="password" name="password" id="password_login" placeholder="Password">
-                            <button class="row" id="btn-login">Login</button>
-                            </form>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                                <label class="form-check-label" for="exampleCheck1">Eingeloggt bleiben</label>
-                              </div>
-                        <div>oder <a href="#">Registrieren</a></div>
-                    </div>
-            <!-- Register Seite -->       
-            <div id="register_page" class="hide" >
-                <form action="">
-                    <input class="row" type="text" name="username" id="username_register" placeholder="UserName">
-                    <input class="row" type="password" name="password" id="password_register" placeholder="Password">
-                    <button class="row" id="btn-register">Register</button>
-                    </form>
-                <div>zurück zum <a href="#">Login</a></div>
-            </div>
-            <!-- Haupt Menü Seite --> 
-            <div id="main_manue" class="hide" >
-                <div class="navbar">
-                    <img src="Logo-Musik-App-Klein.png" alt="">
-                </div>
-                    <h3>Wählen sie aus folgenden Kategorien</h3>
-                        <button class="kat">Pop</button>
-                        <button class="kat">Hip Hop</button>
-                        <button class="kat">Schlager</button>
-                        <button class="kat">Klassik</button>
-                        <button class="btn btn-primary">weiter zum Quiz</button>
-            
-                </div>
+<body>
 
-                <div id="quiz" class="hide" >
-                        <div class="navbar">
-                                <img src="Logo-Musik-App-Klein.png" alt="">
-                            </div>
-                        <audio src="Musik/HipHop/2Pac_DearMama.mp3"   ></audio>
+    <div id="logo" class="">
+        <img src="Logo-Musik-App-1.png" alt="">
+    </div>
+    <!-- Login Seite -->
+    <div id="login_page" class="">
+        <form>
+            <div id="regError" style="color: red;"></div>
+            <input class="row" type="text" name="username" id="username" placeholder="UserName">
+            <input class="row" type="password" name="password" id="password" placeholder="Password">
+            <button class="row" id="btn-submit">Registrieren</button>
+        </form>
 
-                        <div class="equalizer">
-                                <span class="column" id="purple"></span>
-                                <span class="column" id="blue"></span>
-                                <span class="column" id="cyan"></span>
-                                <span class="column" id="green"></span>
-                                <span class="column" id="yellow"></span>
-                                <span class="column" id="orange"></span>
-                                <span class="column" id="red"></span> 
-                                
-                             </div>
+        <div>
+            <a href="#">Bereits registriert? Zum Login...</a>
+        </div>
+    </div>
+    <!-- Haupt Menü Seite -->
+    <div id="main_manue" class="hide">
+        <div class="navbar">
+            <img src="Logo-Musik-App-Klein.png" alt="">
+            <button class="btn-logout">Logout</button>
+        </div>
+        <h3>Wählen sie aus folgenden Kategorien</h3>
+        <fieldset id="selectCat">
+            <input type="radio" id="radPop" name="category" value="Pop">
+            <label for="radPop">Pop</label>
+            <input type="radio" id="radHiho" name="category" value="HipHop">
+            <label for="radHiho">Hip Hop</label>
+            <input type="radio" id="radSch" name="category" value="Schlager">
+            <label for="radSch">Schlager</label>
+            <input type="radio" id="radRock" name="category" value="Rock">
+            <label for="radRock">Rock</label>
+        </fieldset>
+        <button id="btn-startQuiz" class="btn btn-primary" disabled>weiter zum Quiz</button>
 
-                            <button class="antworten">Snoop Dogg, Let me ride</button>
-                            <button class="antworten">2Pac, Dear Mama</button>
-                            <button class="antworten">Xibit, X gonna give it to you</button>
-                            <button class="antworten">Ice-T, I'm your pusher</button>
-                            <button class="btn btn-primary">nächster Song <i class="fas fa-angle-right"></i></button>
-                
-                    </div>
+    </div>
 
-    </body>
+    <!-- Quiz Seite  -->
+
+    <div id="quiz" class="hide">
+        <div class="navbar">
+            <img src="Logo-Musik-App-Klein.png" alt="">
+            <button class="btn-logout">Logout</button>
+        </div>
+        <div id="musik"></div>
+
+        <div class="equalizer">
+            <span class="column" id="purple"></span>
+            <span class="column" id="blue"></span>
+            <span class="column" id="cyan"></span>
+            <span class="column" id="green"></span>
+            <span class="column" id="yellow"></span>
+            <span class="column" id="orange"></span>
+            <span class="column" id="red"></span>
+            <span class="column" id="violet"></span>
+
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="100%" aria-valuemin="0" aria-valuemax="100">10 Sek</div>
+        </div>
+
+        <fieldset id="antworten">
+            <input id="answer1" type="radio" name="answer" value="">
+            <label for="answer1" class="antworten"></label>
+            <input id="answer2" type="radio" name="answer" value="">
+            <label for="answer2" class="antworten"></label>
+            <input id="answer3" type="radio" name="answer" value="">
+            <label for="answer3" class="antworten"></label>
+            <input id="answer4" type="radio" name="answer" value="">
+            <label for="answer4" class="antworten"></label>
+        </fieldset>
+        <button id="next" class="btn btn-primary" disabled>nächste Frage</button>
+
+
+    </div>
+
+    <!-- Rangliste  -->
+
+    <div id="rangliste" class="hide">
+        <div class="navbar">
+            <img src="Logo-Musik-App-Klein.png" alt="">
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Kategorie</th>
+                    <th scope="col">Punkte</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>HipHop</td>
+                    <td>2500</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Pop</td>
+                    <td>2350</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>Larry</td>
+                    <td>Schlager</td>
+                    <td>1750</td>
+                </tr>
+            </tbody>
+        </table>
+        <button>neues Quiz starten</button>
+
+
+
+
+    </div>
+
+</body>
+
 </html>

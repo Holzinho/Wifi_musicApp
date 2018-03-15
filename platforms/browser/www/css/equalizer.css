@@ -1,50 +1,67 @@
 .equalizer {
+  position: relative;
   text-align: center;
   margin: 10px auto;
+  height: 210px;
   width: 100%;
   background: black;
   padding: 10px;
 }
   
   .column {
+    position: absolute;
     display: inline-block;
-    width: 40px;
-    margin: 5px;
+    width: 30px;
+    margin: 0px;
+    bottom: 0px;
   }
   
   #purple {
+    left: 25px;
     height: 160px;
     background-color: #8800FF;
   }
   
   #blue {
+    left: 65px;
     height: 140px;
     background-color: #0022FF;
   }
   
   #cyan {
+    left: 105px;
     height: 100px;
     background-color: #22FFFF;
   }
   
   #green {
+    left: 145px;
     height: 140px;
     background-color: #00BB00;
   }
   
   #yellow {
+    left: 185px;
     height: 180px;
     background-color: #FFFF00;
   }
   
   #orange {
+    left: 225px;
     height: 70px;
     background-color: #FF6600;
   }
   
   #red {
+    left: 265px;
     height: 200px;
     background-color: #FF0000;
+  }
+
+  #violet {
+    left: 305px;
+    height: 200px;
+    background-color: violet;
   }
   
   

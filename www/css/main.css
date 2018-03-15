@@ -22,7 +22,7 @@ body::after {
 #logo {
     margin-top: 120px;
  }
- #btn-login {
+ #btn-submit {
      display: flex;
   align-items: center;
   justify-content: center;
@@ -31,7 +31,7 @@ body::after {
   border: none;
  }
 
- #password_login, #username_login , #password_register, #username_register, #btn-login, #btn-register{
+ #password, #username, #btn-submit{
     width: 275px; ;
     height: 28px;
      margin-top: 5px;
@@ -60,6 +60,7 @@ button {
     margin: 5px;
 }
 
+
 .navbar {
     background-color: rgb(29, 34, 34);
     margin-bottom: 75px;
@@ -67,14 +68,58 @@ button {
 h3 {
     margin-bottom: 25px;
 }
-
-.antworten {
+#selectCat input[type=radio] {
+    display: none;
+}
+#selectCat input[type=radio] + label {
+    display: inline-block;
+    width: 150px;
+    height: 125px;
+    line-height: 125px;
+    background-color: red;
+    color: white;
+}
+#selectCat input[type=radio]:checked + label {
+    background-color: orange;
+}
+#antworten > input[type=radio] {
+    display: none;
+}
+#antworten >  label.antworten {
+    display: block;
+    margin: 5px;
     background-color: lightblue;
     color: rgb(51, 51, 51);
-    width: 100%;
     height: 38px;
+    line-height: 38px;
     border: none;
+    border-radius: 5px;
+}
 
+#antworten input[type=radio]:checked + label{
+    background-color: darkblue;
+    color: white;
+}
+
+.richtig{
+    background-color: green;
+    color: white;
+}
+
+.falsch{
+    background-color: green;
+    color: white;
+}
+
+.progress {
+    position: relative;
+    width: 300px;
+    margin: auto;
+}
+
+.progress-bar {
+   background-color: red;
+   width: 100%;
 }
 
 
