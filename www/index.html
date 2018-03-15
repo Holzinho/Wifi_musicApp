@@ -13,8 +13,8 @@
     <title>Musik-Quiz</title>
     <script src="js/jquery-3.3.1.min.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-    <!--<script src="js/equalizer.js"></script>
-    <script src="js/progress.js"></script>-->
+    <script src="js/equalizer.js"></script>
+    <!--<script src="js/progress.js"></script>-->
     <script src="js/register.js"></script>
     <script src="js/login.js"></script>
     <!--<script src="js/quiz.js"></script>-->
@@ -35,6 +35,8 @@
         });
 
         function onDeviceReady() {
+
+
 
             var loginConfig = {
                 onerror: function (err) {
@@ -82,25 +84,25 @@
             var questions;
             var counter = 0;
             var loadQuestions = function (_questions) {
-                                questions = _questions;
-                            };
-           /* var getNextQuestion = function () {
-                                return questions[counter++];
-              };*/
-              var prepareBtns = function () {
-                                var currentAnswers = [];
-                                currentAnswers = Object.create(questions[counter].incorrectAnswers);
+                questions = _questions;
+            };
+            /* var getNextQuestion = function () {
+                                 return questions[counter++];
+               };*/
+            var prepareBtns = function () {
+                var currentAnswers = [];
+                currentAnswers = Object.create(questions[counter].incorrectAnswers);
 
-                                currentAnswers.push(questions[counter].correctAnswer);
+                currentAnswers.push(questions[counter].correctAnswer);
 
-                                for (var i = 0; i < 4; i++) {
-                                    var random = Math.floor(Math.random() * currentAnswers.length);
-                                    $($('.antworten')[i]).html(currentAnswers.splice(random, 1)[0]);
-                                }
-                                console.log(currentAnswers);
-                            }
+                for (var i = 0; i < 4; i++) {
+                    var random = Math.floor(Math.random() * currentAnswers.length);
+                    $($('.antworten')[i]).html(currentAnswers.splice(random, 1)[0]);
+                }
+                console.log(currentAnswers);
+            }
 
-            
+
             //funktion ende----------------------
             /*also();
             randomNumber();
@@ -122,27 +124,29 @@
             //Logout Button
             $('.btn-logout').on('click', function () {
                 logout(onlogout);
+                location.reload();
             })
 
             $('#selectCat').on('change', function () {
                 $('#btn-startQuiz').prop('disabled', false);
             });
             $('#btn-startQuiz').on('click', function (e) {
-                var currentQuest = 0, score = 0, audio, cat = $('#selectCat > input:checked').val();
+                var width = 10, currentQuest = 0, score = 0, time = 0, audio, cat = $('#selectCat > input:checked').val();
                 $.get({
                     url: 'startQuiz/' + cat,
                     complete: function (data) {
+                        $('#last').hide();
                         $('#next').prop('disabled', true);
                         $('#main_manue').hide();
                         $('#antworten input').prop('checked', false);
                         $('#quiz').show();
-                        
+
                         loadQuestions(data.responseJSON);
                         console.log(data.responseJSON);
                         //-----------------------------------------------------------------------------------------------------
                         prepareBtns();
                         //-----------------------------------------------------------------------------------------------------------
-                        
+
                         var x = JSON.parse(data.responseText);
                         console.log(x[currentQuest].correctAnswer);
                         $('<audio>')
@@ -152,7 +156,8 @@
                         //soll den Countdown starten...        
 
 
-                        var width = 10;
+                        playing = true;
+                        animate();
                         var starteProgress = function () {
 
                             if (width > 0) {
@@ -163,27 +168,36 @@
                             } if (width == 0) {
 
                                 clearInterval(stopProgress);
+                                playing = false;
+                                $('#next').prop('disabled', false);
                                 console.log('Fertig...');
                             };
 
                         };
                         var stopProgress = setInterval(function () { starteProgress() }, 1000);
 
-
                         $('.antworten').on('click', function () {
-
+                            if (playing == false) {
+                                console.log('zu spät...');
+                                $('#next').prop('disabled', false);
+                                return;
+                            }
                             console.log(this.textContent);
                             $('#next').prop('disabled', false);
                             if (this.textContent == x[currentQuest].correctAnswer) {
                                 console.log('right');
                                 clearInterval(stopProgress);
+                                playing = false;
                                 score = score + 100;
+                                time += parseInt($('.progress-bar').html());
+                                console.log(time);
                                 $('audio').remove();
                                 console.log(score);
                                 $(this)
                                     .css({ 'background-color': 'green' });
                             } else {
                                 clearInterval(stopProgress);
+                                playing = false;
                                 $(this)
                                     .css({ 'background-color': 'red' });
                                 $('audio').remove();
@@ -192,37 +206,60 @@
 
                         })
                         $('#next').on('click', function () {
-                            if(counter < 9){
-                            currentQuest++;
-                            counter++;
-                            console.log(counter);
-                            $('#next').prop('disabled', true);
-                            console.log(currentQuest);
-                            $('#antworten input')
-                                .prop('checked', false);
-                            $('.antworten')
-                                .css({ 'background-color': 'lightblue', 'color': 'black' });
-                            
-                            //nicht fix ------------------------------------
-                            prepareBtns();
-                            //noch nicht fix-----------------------------------------
+                            if (counter < 9) {
+                                width = 10;
+                                currentQuest++;
+                                counter++;
+                                playing = true;
+                                animate();
+                                console.log(counter);
+                                $('#next').prop('disabled', true);
+                                console.log(currentQuest);
+                                $('#antworten input')
+                                    .prop('checked', false);
+                                $('.antworten')
+                                    .css({ 'background-color': 'lightblue', 'color': 'black' });
+
+                                //nicht fix ------------------------------------
 
 
-                            var x = JSON.parse(data.responseText);
-                            console.log(x[currentQuest].correctAnswer);
-                            console.log(x);
-                            $('<audio>')
-                                .appendTo('#musik')
-                                .attr('src', 'Musik/' + cat + '/' + x[currentQuest].correctAnswer)
-                                .prop('autoplay', true);
-                            } else {
-                                $('#quiz').hide();
-                                $('#rangliste').show();
-                            }
+                                stopProgress = setInterval(function () { starteProgress() }, 1000);
+                                //noch nicht fix-----------------------------------------
+
+
+                                prepareBtns();
+
+                                var x = JSON.parse(data.responseText);
+                                console.log(x[currentQuest].correctAnswer);
+                                console.log(x);
+                                $('<audio>')
+                                    .appendTo('#musik')
+                                    .attr('src', 'Musik/' + cat + '/' + x[currentQuest].correctAnswer)
+                                    .prop('autoplay', true);
+                            } if(counter == 9) {
+                                $('#next').hide();
+                                $('#last')
+                                    .prop('disabled', false)
+                                    .show();
+
+
+                            };
 
 
 
 
+
+
+                        })
+
+                        $('#last').on('click', function () {
+                            $('#quiz').hide();
+                            $('#rangliste').show();
+                        });
+
+
+                        $('#backQuiz').on('click', function () {
+                            location.reload();
                         })
                     }
                 });
@@ -259,7 +296,7 @@
     <div id="main_manue" class="hide">
         <div class="navbar">
             <img src="Logo-Musik-App-Klein.png" alt="">
-            <button class="btn-logout">Logout</button>
+            <button type="button" class="btn-logout btn btn-danger">Logout</button>
         </div>
         <h3>Wählen sie aus folgenden Kategorien</h3>
         <fieldset id="selectCat">
@@ -281,7 +318,7 @@
     <div id="quiz" class="hide">
         <div class="navbar">
             <img src="Logo-Musik-App-Klein.png" alt="">
-            <button class="btn-logout">Logout</button>
+            <button type="button" class="btn-logout btn btn-danger">Logout</button>
         </div>
         <div id="musik"></div>
 
@@ -312,6 +349,7 @@
             <label for="answer4" class="antworten"></label>
         </fieldset>
         <button id="next" class="btn btn-primary" disabled>nächste Frage</button>
+        <button id="last" class="btn btn-primary" disabled>zum Ergebnis</button>
 
 
     </div>
@@ -321,6 +359,7 @@
     <div id="rangliste" class="hide">
         <div class="navbar">
             <img src="Logo-Musik-App-Klein.png" alt="">
+            <button type="button" class="btn-logout btn btn-danger">Logout</button>
         </div>
 
         <table class="table table-striped">
@@ -353,7 +392,7 @@
                 </tr>
             </tbody>
         </table>
-        <button>neues Quiz starten</button>
+        <button id="backQuiz" class="btn btn-primary">neues Quiz starten</button>
 
 
 

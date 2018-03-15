@@ -24,7 +24,7 @@ function randomNumber(min, max) {
   violet = 110
   
   
-  var playing=true;
+  var playing=false;
   
   
   function changeHeight(column, height) {
