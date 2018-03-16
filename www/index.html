@@ -236,7 +236,7 @@
                                     .appendTo('#musik')
                                     .attr('src', 'Musik/' + cat + '/' + x[currentQuest].correctAnswer)
                                     .prop('autoplay', true);
-                            } if(counter == 9) {
+                            } if (counter == 9) {
                                 $('#next').hide();
                                 $('#last')
                                     .prop('disabled', false)
@@ -255,6 +255,47 @@
                         $('#last').on('click', function () {
                             $('#quiz').hide();
                             $('#rangliste').show();
+                            console.log('Dein Score ist: ' + score);
+                            console.log('Du hast ' + time + ' Sekunden gebraucht');
+                            var gesamtScore = time * score;
+                            var gesamt = {
+                                    gesamtScore: gesamtScore,
+                                    username: localStorage.username,
+                                    cat: cat
+                                }
+                            console.log(gesamtScore);
+                            $.post({
+                                url: 'rangliste',
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    gesamtScore: gesamtScore,
+                                    username: localStorage.username,
+                                    cat: cat
+                                }),
+                                complete: function (data) {
+                                    ranglisteNeu = JSON.parse(data.responseText);
+                                    console.log(ranglisteNeu.length);
+                                    ranglisteNeu.sort(function(a,b){
+                                        return a.gesamtScore < b.gesamtScore;
+                                    });
+                                    console.log(JSON.stringify(ranglisteNeu));
+
+                                    var i, tr, th, td;
+                                    for(var i = 0; i< ranglisteNeu.length; i++){
+                                        var tr = $('<tr>').appendTo('tbody');
+                                        var th = $('<th>').appendTo(tr);
+                                            th.html(i + 1);
+                                        var td1 = $('<td>').appendTo(tr);
+                                            td1.html(ranglisteNeu[i].username);
+                                        var td2 = $('<td>').appendTo(tr);
+                                            td2.html(ranglisteNeu[i].cat);
+                                        var td3 = $('<td>').appendTo(tr);
+                                            td3.html(ranglisteNeu[i].gesamtScore);
+                                        }
+                                    
+                                }
+
+                            })
                         });
 
 
@@ -266,6 +307,7 @@
             });
 
 
+            console.log(localStorage.username);
 
         }
 
@@ -372,24 +414,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>HipHop</td>
-                    <td>2500</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Pop</td>
-                    <td>2350</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>Schlager</td>
-                    <td>1750</td>
-                </tr>
+            
+                
             </tbody>
         </table>
         <button id="backQuiz" class="btn btn-primary">neues Quiz starten</button>

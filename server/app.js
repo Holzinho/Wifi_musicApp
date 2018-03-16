@@ -13,6 +13,10 @@ const getAllUsers = () => {
     return JSON.parse(fs.readFileSync('server/users.json'));
 }
 
+const getRangliste = ()=> {
+    return JSON.parse(fs.readFileSync('server/rangliste.json'));
+}
+
 const findUser = (username) => {
     var usersList = getAllUsers();
     var returnUser = null;
@@ -25,16 +29,21 @@ const findUser = (username) => {
 }
 
 app.use(express.static('www'));
+app.use(bodyParser.urlencoded({
+    extended: true
+  }));
 app.use(bodyParser.json());
 
 app.get('/startQuiz/:cat', (req, res) =>{
     res.send(quiz.shuffle());
 });
 
+
+
 app.post('/login', (req, res) => {
     var user = findUser(req.body.username);
     if (user && req.body.pw === user.pw) {
-        return res.send('Dub ist jetzt eingeloggt!');
+        return res.send('Du bist jetzt eingeloggt!');
     }
     res.send(401, 'Falsches PW oder User nicht gefunden!');
 });
@@ -56,6 +65,16 @@ app.post('/register', (req, res) => {
         });
     });
 });
+
+app.post('/rangliste', (req, res) =>{
+    console.log(req);
+    var rangliste = getRangliste();
+    Array.prototype.push.call(rangliste, req.body);
+    fs.writeFile('server/rangliste.json', JSON.stringify(rangliste), function(){
+        res.send(rangliste);
+    })
+    
+    });
 
 app.listen(port, hostname, () => {
     console.log('Server läuft auf Port ' + port);
