@@ -1,16 +1,22 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="at.lalelu.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="at.mquiz.app" version="1.1.2" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>MusikQuiz</name>
     <description>
-        A blank PhoneGap app.
+        Die coolste Zeichen App der Welt!
+        Speichere deine Bilder lokal am Gerät.
     </description>
-    <author email="support@phonegap.com" href="http://phonegap.com">
-        PhoneGap Team
+    <author email="vincenza@wifi-it.at" href="http://wifiwien.at">
+        Webdevoloper Javascript WIFIWien
     </author>
     <content src="index.html" />
-    <access origin="*" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="android-minSdkVersion" value="14" />
+
+    
+
     <platform name="android">
-    <icon desity="ldpi" src="www/icon.png"/>
-    <splash desity="land-ldpi" src="www/icon.png"/>
+        <icon density="ldpi" src="www/icon.png" />
+        <splash density="land-ldpi" src="www/icon.png" />
     </platform>
+
 </widget>
