@@ -127,11 +127,12 @@
                 location.reload();
             })
 
+
             $('#selectCat').on('change', function () {
                 $('#btn-startQuiz').prop('disabled', false);
             });
             $('#btn-startQuiz').on('click', function (e) {
-                var width = 10, currentQuest = 0, score = 0, time = 0, audio, cat = $('#selectCat > input:checked').val();
+                var frage = 1, width = 10, currentQuest = 0, score = 0, time = 0, audio, cat = $('#selectCat > input:checked').val();
                 $.get({
                     url: 'startQuiz/' + cat,
                     complete: function (data) {
@@ -140,6 +141,7 @@
                         $('#main_manue').hide();
                         $('#antworten input').prop('checked', false);
                         $('#quiz').show();
+                        $('#counterFrage').html('Frage: ' + frage + ' von 10');
 
                         loadQuestions(data.responseJSON);
                         console.log(data.responseJSON);
@@ -178,7 +180,7 @@
 
                         $('.antworten').on('click', function () {
                             if (playing == false) {
-                                console.log('zu spät...');
+                                $('#ausgabe').html('leider zu spät...').css({ 'color': 'red' });
                                 $('#next').prop('disabled', false);
                                 return;
                             }
@@ -195,13 +197,14 @@
                                 console.log(score);
                                 $(this)
                                     .css({ 'background-color': 'green' });
+                                $('#ausgabe').html('Sehr gut, weiter so..').css({ 'color': 'green' });
                             } else {
                                 clearInterval(stopProgress);
                                 playing = false;
                                 $(this)
                                     .css({ 'background-color': 'red' });
                                 $('audio').remove();
-                                console.log('falsche Antwort');
+                                $('#ausgabe').html('Oje, richtig wäre ' + x[currentQuest].correctAnswer).css({ 'color': 'red' });
                             }
 
                         })
@@ -209,6 +212,7 @@
                             if (counter < 9) {
                                 width = 10;
                                 currentQuest++;
+                                frage++;
                                 counter++;
                                 playing = true;
                                 animate();
@@ -219,6 +223,8 @@
                                     .prop('checked', false);
                                 $('.antworten')
                                     .css({ 'background-color': 'lightblue', 'color': 'black' });
+                                $('#counterFrage').html('Frage: ' + frage + ' von 10');
+                                $('#ausgabe').html('');
 
                                 //nicht fix ------------------------------------
 
@@ -241,6 +247,7 @@
                                 $('#last')
                                     .prop('disabled', false)
                                     .show();
+                                $('#ausgabe').html('');
 
 
                             };
@@ -259,10 +266,10 @@
                             console.log('Du hast ' + time + ' Sekunden gebraucht');
                             var gesamtScore = time * score;
                             var gesamt = {
-                                    gesamtScore: gesamtScore,
-                                    username: localStorage.username,
-                                    cat: cat
-                                }
+                                gesamtScore: gesamtScore,
+                                username: localStorage.username,
+                                cat: cat
+                            }
                             console.log(gesamtScore);
                             $.post({
                                 url: 'rangliste',
@@ -275,24 +282,24 @@
                                 complete: function (data) {
                                     ranglisteNeu = JSON.parse(data.responseText);
                                     console.log(ranglisteNeu.length);
-                                    ranglisteNeu.sort(function(a,b){
+                                    ranglisteNeu.sort(function (a, b) {
                                         return a.gesamtScore < b.gesamtScore;
                                     });
-                                    console.log(JSON.stringify(ranglisteNeu));
+                                    console.log(ranglisteNeu);
 
                                     var i, tr, th, td;
-                                    for(var i = 0; i< ranglisteNeu.length; i++){
+                                    for (var i = 0; i < ranglisteNeu.length; i++) {
                                         var tr = $('<tr>').appendTo('tbody');
                                         var th = $('<th>').appendTo(tr);
-                                            th.html(i + 1);
+                                        th.html(i + 1);
                                         var td1 = $('<td>').appendTo(tr);
-                                            td1.html(ranglisteNeu[i].username);
+                                        td1.html(ranglisteNeu[i].username);
                                         var td2 = $('<td>').appendTo(tr);
-                                            td2.html(ranglisteNeu[i].cat);
+                                        td2.html(ranglisteNeu[i].cat);
                                         var td3 = $('<td>').appendTo(tr);
-                                            td3.html(ranglisteNeu[i].gesamtScore);
-                                        }
-                                    
+                                        td3.html(ranglisteNeu[i].gesamtScore);
+                                    }
+
                                 }
 
                             })
@@ -302,6 +309,8 @@
                         $('#backQuiz').on('click', function () {
                             location.reload();
                         })
+
+
                     }
                 });
             });
@@ -392,6 +401,8 @@
         </fieldset>
         <button id="next" class="btn btn-primary" disabled>nächste Frage</button>
         <button id="last" class="btn btn-primary" disabled>zum Ergebnis</button>
+        <div id="counterFrage"></div>
+        <div id="ausgabe"></div>
 
 
     </div>
@@ -414,8 +425,8 @@
                 </tr>
             </thead>
             <tbody>
-            
-                
+
+
             </tbody>
         </table>
         <button id="backQuiz" class="btn btn-primary">neues Quiz starten</button>
